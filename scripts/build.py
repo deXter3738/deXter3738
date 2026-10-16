@@ -8,14 +8,18 @@ OUT = os.environ.get("OUT_DIR") or os.path.join(REPO_ROOT, "assets")
 os.makedirs(OUT, exist_ok=True)
 
 W, H = 1584, 396
-GRID_X0, GRID_STEP, GRID_N = 100.5, 173, 9
+GRID_X0, GRID_STEP, GRID_N = 0.5, 173, 10
 GOLD, VIOLET = "#FED259", "#6600FF"
 INK_DARK, INK_LIGHT = "#0F0F0E", "#FAF8F5"   # cover ground / cover type colour
+# GitHub's default dark canvas. The dark banner uses it as its ground so the
+# artwork sits flush against the README page instead of reading as a block.
+GH_DARK_BG = "#0D1117"
 
 TITLE = "Interdisciplinary Designer"
 SUB = "Seeking Patterns in Complexity."
 TITLE_SIZE, SUB_SIZE = 88, 32
-X = GRID_X0
+X = 0          # flush left: the banner is shown at 100% width, so
+               # x=0 puts the type on the README's own text margin
 TITLE_Y, SUB_Y = 188, 252
 
 
@@ -34,11 +38,14 @@ def rays(cx, cy, n, length, spread_deg, start_deg, color_id, opacity, blur_id, b
 
 def banner(theme):
     dark = theme == "dark"
-    bg = INK_DARK if dark else INK_LIGHT
+    bg = GH_DARK_BG if dark else INK_LIGHT
     type_col = INK_LIGHT if dark else INK_DARK
     sub_col = "#C4C4C4" if dark else "#5F5D59"
     grid_col = "white" if dark else INK_DARK
     glow_blend = "screen" if dark else "multiply"
+    # In dark mode the ground wash is kept faint: anything stronger lifts the
+    # artwork above GH_DARK_BG and the banner reads as a block on the page.
+    ground_op = 0.05 if dark else 0.6
 
     title_d, title_w = text_path(TITLE, "serif", TITLE_SIZE, X, TITLE_Y)
     sub_d, sub_w = text_path(SUB, "sans", SUB_SIZE, X, SUB_Y, tracking=0.2)
@@ -54,6 +61,16 @@ def banner(theme):
         + rays(*sweep_origin, 5, 1400, 30, 124, "rayGrad2", 0.28 if dark else 0.0, "blur14", glow_blend)
     )
 
+    # The banner is shown at 100% width, so only its top and bottom edges meet
+    # the page. Fade those into the ground colour and the artwork stops reading
+    # as a block sitting on the README.
+    edge_fade = (
+        f'<rect width="{W}" height="52" fill="url(#fadeTop)"/>'
+        f'<rect y="286" width="{W}" height="{H - 286}" fill="url(#fadeBot)"/>'
+        f'<rect width="40" height="{H}" fill="url(#fadeLeft)"/>'
+        f'<rect x="{W - 96}" width="96" height="{H}" fill="url(#fadeRight)"/>'
+    ) if dark else ""
+
     if dark:
         glow_title = (
             f'<g opacity="0.5" filter="url(#blur10)" style="mix-blend-mode:screen">'
@@ -67,7 +84,7 @@ def banner(theme):
     svg = f'''<svg width="{W}" height="{H}" viewBox="0 0 {W} {H}" fill="none" xmlns="http://www.w3.org/2000/svg">
 <defs>
   <radialGradient id="ground" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 {H}) rotate(-14) scale(1632 1260)">
-    <stop stop-color="{'#666666' if dark else '#FFFFFF'}"/><stop offset="1" stop-color="{bg}"/>
+    <stop stop-color="{'#8E9AB5' if dark else '#FFFFFF'}"/><stop offset="1" stop-color="{bg}"/>
   </radialGradient>
   <linearGradient id="titleGrad" x1="{X}" y1="0" x2="{X + title_w}" y2="0" gradientUnits="userSpaceOnUse">
     <stop stop-color="{GOLD}"/><stop offset="0.5" stop-color="#C69AC4"/><stop offset="1" stop-color="{VIOLET}"/>
@@ -81,6 +98,18 @@ def banner(theme):
   <linearGradient id="rayGrad2" x1="{sweep_origin[0]}" y1="{sweep_origin[1]}" x2="{sweep_origin[0] - 1000}" y2="{sweep_origin[1] + 900}" gradientUnits="userSpaceOnUse">
     <stop stop-color="white" stop-opacity="0.9"/><stop offset="1" stop-color="white" stop-opacity="0"/>
   </linearGradient>
+  <linearGradient id="fadeTop" x1="0" y1="0" x2="0" y2="52" gradientUnits="userSpaceOnUse">
+    <stop stop-color="{bg}"/><stop offset="1" stop-color="{bg}" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="fadeBot" x1="0" y1="286" x2="0" y2="{H}" gradientUnits="userSpaceOnUse">
+    <stop stop-color="{bg}" stop-opacity="0"/><stop offset="1" stop-color="{bg}"/>
+  </linearGradient>
+  <linearGradient id="fadeLeft" x1="0" y1="0" x2="40" y2="0" gradientUnits="userSpaceOnUse">
+    <stop stop-color="{bg}"/><stop offset="1" stop-color="{bg}" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="fadeRight" x1="{W - 96}" y1="0" x2="{W}" y2="0" gradientUnits="userSpaceOnUse">
+    <stop stop-color="{bg}" stop-opacity="0"/><stop offset="1" stop-color="{bg}"/>
+  </linearGradient>
   <filter id="blur40" filterUnits="userSpaceOnUse" x="-300" y="-600" width="2200" height="1500"><feGaussianBlur stdDeviation="40"/></filter>
   <filter id="blur14" filterUnits="userSpaceOnUse" x="-300" y="-600" width="2200" height="1500"><feGaussianBlur stdDeviation="14"/></filter>
   <filter id="blur10" filterUnits="userSpaceOnUse" x="0" y="0" width="1584" height="396"><feGaussianBlur stdDeviation="10"/></filter>
@@ -89,9 +118,10 @@ def banner(theme):
 </defs>
 <g>
   <rect width="{W}" height="{H}" fill="{bg}"/>
-  <rect width="{W}" height="{H}" fill="url(#ground)" fill-opacity="{0.2 if dark else 0.6}"/>
+  <rect width="{W}" height="{H}" fill="url(#ground)" fill-opacity="{ground_op}"/>
   {sweep}
   <g opacity="0.07">{grid}</g>
+  {edge_fade}
   {glow_title}
   <path d="{title_d}" fill="{type_col}"/>
   <path d="{sub_d}" fill="{sub_col}"/>
@@ -107,9 +137,10 @@ def banner(theme):
 def label(text, theme, size=34, pad=4):
     dark = theme == "dark"
     col = INK_LIGHT if dark else INK_DARK
-    d, w = text_path(text, "serif", size, pad, size * 0.78 + pad)
+    # No left padding — labels sit on the README's text margin like the banner.
+    d, w = text_path(text, "serif", size, 0, size * 0.78 + pad)
     h = round(size * 1.05 + 2 * pad)
-    w = math.ceil(w + 2 * pad)
+    w = math.ceil(w)
     svg = (f'<svg width="{w}" height="{h}" viewBox="0 0 {w} {h}" xmlns="http://www.w3.org/2000/svg">'
            f'<path d="{d}" fill="{col}"/></svg>')
     slug = text.lower().replace(" ", "-")
