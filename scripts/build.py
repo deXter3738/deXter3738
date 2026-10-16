@@ -1,7 +1,10 @@
 import math, os
-from textpath import text_path, text_width
 
-OUT = "/mnt/user-data/outputs/assets"
+from textpath import text_path
+
+# Write next to the repo root (scripts/ -> ../assets), overridable with OUT_DIR.
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OUT = os.environ.get("OUT_DIR") or os.path.join(REPO_ROOT, "assets")
 os.makedirs(OUT, exist_ok=True)
 
 W, H = 1584, 396
@@ -95,8 +98,9 @@ def banner(theme):
   <path d="{sub_d}" fill="url(#subShine)"/>
 </g>
 </svg>'''
-    path = f"{OUT}/banner-{theme}.svg"
-    open(path, "w").write(svg)
+    path = os.path.join(OUT, f"banner-{theme}.svg")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(svg)
     return path
 
 
@@ -109,8 +113,9 @@ def label(text, theme, size=34, pad=4):
     svg = (f'<svg width="{w}" height="{h}" viewBox="0 0 {w} {h}" xmlns="http://www.w3.org/2000/svg">'
            f'<path d="{d}" fill="{col}"/></svg>')
     slug = text.lower().replace(" ", "-")
-    path = f"{OUT}/label-{slug}-{theme}.svg"
-    open(path, "w").write(svg)
+    path = os.path.join(OUT, f"label-{slug}-{theme}.svg")
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(svg)
     return path
 
 

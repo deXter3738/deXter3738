@@ -1,0 +1,5 @@
+# generator deps + local font copies
+.venv/
+__pycache__/
+scripts/fonts/
+.DS_Store

@@ -38,7 +38,8 @@ Figma · Framer · Python · TypeScript / React (learning in public)
 
 <!--
 Projects section — add here once repos are public. Generate a matching
-label with build.py (label("Building", theme)) and drop it in like the others.
+label with scripts/build.py (label("Building", theme)) and drop it in like
+the others. See scripts/README.md for how to run it.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/label-building-dark.svg">
