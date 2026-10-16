@@ -8,7 +8,7 @@ OUT = os.environ.get("OUT_DIR") or os.path.join(REPO_ROOT, "assets")
 os.makedirs(OUT, exist_ok=True)
 
 W, H = 1584, 396
-GRID_X0, GRID_STEP, GRID_N = 0.5, 173, 10
+GRID_X0, GRID_STEP, GRID_N = 0.5, 173, 10   # 0.5 keeps the 1px rules crisp
 GOLD, VIOLET = "#FED259", "#6600FF"
 INK_DARK, INK_LIGHT = "#0F0F0E", "#FAF8F5"   # cover ground / cover type colour
 # GitHub's default dark canvas. The dark banner uses it as its ground so the
@@ -61,9 +61,9 @@ def banner(theme):
         + rays(*sweep_origin, 5, 1400, 30, 124, "rayGrad2", 0.28 if dark else 0.0, "blur14", glow_blend)
     )
 
-    # The banner is shown at 100% width, so only its top and bottom edges meet
-    # the page. Fade those into the ground colour and the artwork stops reading
-    # as a block sitting on the README.
+    # The banner is shown at 100% width, so its edges meet the page. Fading
+    # them into the ground colour stops the artwork reading as a block on the
+    # README. The grid is drawn after this, so the rules still run end to end.
     edge_fade = (
         f'<rect width="{W}" height="52" fill="url(#fadeTop)"/>'
         f'<rect y="286" width="{W}" height="{H - 286}" fill="url(#fadeBot)"/>'
@@ -120,8 +120,8 @@ def banner(theme):
   <rect width="{W}" height="{H}" fill="{bg}"/>
   <rect width="{W}" height="{H}" fill="url(#ground)" fill-opacity="{ground_op}"/>
   {sweep}
-  <g opacity="0.07">{grid}</g>
   {edge_fade}
+  <g opacity="0.07">{grid}</g>
   {glow_title}
   <path d="{title_d}" fill="{type_col}"/>
   <path d="{sub_d}" fill="{sub_col}"/>
