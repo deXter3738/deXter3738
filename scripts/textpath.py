@@ -1,12 +1,19 @@
 """Shape a string with HarfBuzz and return SVG path data (text as outlines)."""
+import os
+
 from fontTools.ttLib import TTFont
 from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.pens.transformPen import TransformPen
 import uharfbuzz as hb
 
+# The banner is set in Instrument Serif (titles, labels) and Inter (subtitle).
+# `python scripts/fetch_fonts.py` drops both into scripts/fonts/ as serif.ttf
+# and sans.ttf. Override per-machine with SERIF_FONT / SANS_FONT if you keep
+# them elsewhere.
+FONTS_DIR = os.environ.get("FONTS_DIR", os.path.join(os.path.dirname(os.path.abspath(__file__)), "fonts"))
 FONTS = {
-    "serif": "/home/claude/fonts/serif.ttf",
-    "sans": "/home/claude/fonts/sans.ttf",
+    "serif": os.path.expanduser(os.environ.get("SERIF_FONT") or os.path.join(FONTS_DIR, "serif.ttf")),
+    "sans": os.path.expanduser(os.environ.get("SANS_FONT") or os.path.join(FONTS_DIR, "sans.ttf")),
 }
 _cache = {}
 
@@ -14,6 +21,11 @@ _cache = {}
 def _load(key):
     if key not in _cache:
         path = FONTS[key]
+        if not os.path.exists(path):
+            raise FileNotFoundError(
+                f"No {key} font at {path}. Run `python scripts/fetch_fonts.py` "
+                f"to download it, or set {key.upper()}_FONT to a .ttf path."
+            )
         tt = TTFont(path)
         blob = hb.Blob.from_file_path(path)
         face = hb.Face(blob)
