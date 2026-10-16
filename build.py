@@ -1,0 +1,122 @@
+import math, os
+from textpath import text_path, text_width
+
+OUT = "/mnt/user-data/outputs/assets"
+os.makedirs(OUT, exist_ok=True)
+
+W, H = 1584, 396
+GRID_X0, GRID_STEP, GRID_N = 100.5, 173, 9
+GOLD, VIOLET = "#FED259", "#6600FF"
+INK_DARK, INK_LIGHT = "#0F0F0E", "#FAF8F5"   # cover ground / cover type colour
+
+TITLE = "Interdisciplinary Designer"
+SUB = "Seeking Patterns in Complexity."
+TITLE_SIZE, SUB_SIZE = 88, 32
+X = GRID_X0
+TITLE_Y, SUB_Y = 188, 252
+
+
+def rays(cx, cy, n, length, spread_deg, start_deg, color_id, opacity, blur_id, blend="screen"):
+    """Thin triangular light rays fanning out from (cx, cy)."""
+    parts = []
+    for i in range(n):
+        a = math.radians(start_deg + spread_deg * i / max(n - 1, 1))
+        half = math.radians(0.9 + 0.5 * ((i * 7) % 3))
+        l = length * (0.75 + 0.25 * ((i * 5) % 4) / 3)
+        p1 = (cx + l * math.cos(a - half), cy + l * math.sin(a - half))
+        p2 = (cx + l * math.cos(a + half), cy + l * math.sin(a + half))
+        parts.append(f'<polygon points="{cx:.1f},{cy:.1f} {p1[0]:.1f},{p1[1]:.1f} {p2[0]:.1f},{p2[1]:.1f}" fill="url(#{color_id})"/>')
+    return f'<g opacity="{opacity}" filter="url(#{blur_id})" style="mix-blend-mode:{blend}">' + "".join(parts) + "</g>"
+
+
+def banner(theme):
+    dark = theme == "dark"
+    bg = INK_DARK if dark else INK_LIGHT
+    type_col = INK_LIGHT if dark else INK_DARK
+    sub_col = "#C4C4C4" if dark else "#5F5D59"
+    grid_col = "white" if dark else INK_DARK
+    glow_blend = "screen" if dark else "multiply"
+
+    title_d, title_w = text_path(TITLE, "serif", TITLE_SIZE, X, TITLE_Y)
+    sub_d, sub_w = text_path(SUB, "sans", SUB_SIZE, X, SUB_Y, tracking=0.2)
+
+    grid = "".join(
+        f'<path d="M{GRID_X0 + GRID_STEP * i} 0V{H}" stroke="{grid_col}"/>' for i in range(GRID_N)
+    )
+
+    # light sweep from top-right, as in the cover's star burst
+    sweep_origin = (1720, -260)
+    sweep = (
+        rays(*sweep_origin, 9, 1500, 38, 118, "rayGrad", 0.42 if dark else 0.3, "blur40", glow_blend)
+        + rays(*sweep_origin, 5, 1400, 30, 124, "rayGrad2", 0.28 if dark else 0.0, "blur14", glow_blend)
+    )
+
+    if dark:
+        glow_title = (
+            f'<g opacity="0.5" filter="url(#blur10)" style="mix-blend-mode:screen">'
+            f'<path d="{title_d}" fill="{type_col}"/></g>'
+            f'<g filter="url(#blur5)"><path d="{title_d}" fill="url(#titleGrad)" fill-opacity="0.5"/></g>'
+        )
+    else:
+        glow_title = f'<g filter="url(#blur7)"><path d="{title_d}" fill="url(#titleGrad)" fill-opacity="0.55"/></g>'
+
+
+    svg = f'''<svg width="{W}" height="{H}" viewBox="0 0 {W} {H}" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <radialGradient id="ground" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 {H}) rotate(-14) scale(1632 1260)">
+    <stop stop-color="{'#666666' if dark else '#FFFFFF'}"/><stop offset="1" stop-color="{bg}"/>
+  </radialGradient>
+  <linearGradient id="titleGrad" x1="{X}" y1="0" x2="{X + title_w}" y2="0" gradientUnits="userSpaceOnUse">
+    <stop stop-color="{GOLD}"/><stop offset="0.5" stop-color="#C69AC4"/><stop offset="1" stop-color="{VIOLET}"/>
+  </linearGradient>
+  <linearGradient id="subShine" x1="0" y1="{SUB_Y - SUB_SIZE}" x2="0" y2="{SUB_Y + 6}" gradientUnits="userSpaceOnUse">
+    <stop stop-color="{'white' if dark else INK_DARK}" stop-opacity="{0.32 if dark else 0.15}"/><stop offset="1" stop-color="{'white' if dark else INK_DARK}" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="rayGrad" x1="{sweep_origin[0]}" y1="{sweep_origin[1]}" x2="{sweep_origin[0] - 1100}" y2="{sweep_origin[1] + 1000}" gradientUnits="userSpaceOnUse">
+    <stop stop-color="{GOLD}" stop-opacity="{0.9 if dark else 0.7}"/><stop offset="0.3" stop-color="{'#DFB4A2' if dark else GOLD}" stop-opacity="{0.6 if dark else 0.35}"/><stop offset="0.6" stop-color="{VIOLET}" stop-opacity="{0.4 if dark else 0.3}"/><stop offset="1" stop-color="{VIOLET}" stop-opacity="0"/>
+  </linearGradient>
+  <linearGradient id="rayGrad2" x1="{sweep_origin[0]}" y1="{sweep_origin[1]}" x2="{sweep_origin[0] - 1000}" y2="{sweep_origin[1] + 900}" gradientUnits="userSpaceOnUse">
+    <stop stop-color="white" stop-opacity="0.9"/><stop offset="1" stop-color="white" stop-opacity="0"/>
+  </linearGradient>
+  <filter id="blur40" filterUnits="userSpaceOnUse" x="-300" y="-600" width="2200" height="1500"><feGaussianBlur stdDeviation="40"/></filter>
+  <filter id="blur14" filterUnits="userSpaceOnUse" x="-300" y="-600" width="2200" height="1500"><feGaussianBlur stdDeviation="14"/></filter>
+  <filter id="blur10" filterUnits="userSpaceOnUse" x="0" y="0" width="1584" height="396"><feGaussianBlur stdDeviation="10"/></filter>
+  <filter id="blur5" filterUnits="userSpaceOnUse" x="0" y="0" width="1584" height="396"><feGaussianBlur stdDeviation="4.5"/></filter>
+  <filter id="blur7" filterUnits="userSpaceOnUse" x="0" y="0" width="1584" height="396"><feGaussianBlur stdDeviation="7"/></filter>
+</defs>
+<g>
+  <rect width="{W}" height="{H}" fill="{bg}"/>
+  <rect width="{W}" height="{H}" fill="url(#ground)" fill-opacity="{0.2 if dark else 0.6}"/>
+  {sweep}
+  <g opacity="0.07">{grid}</g>
+  {glow_title}
+  <path d="{title_d}" fill="{type_col}"/>
+  <path d="{sub_d}" fill="{sub_col}"/>
+  <path d="{sub_d}" fill="url(#subShine)"/>
+</g>
+</svg>'''
+    path = f"{OUT}/banner-{theme}.svg"
+    open(path, "w").write(svg)
+    return path
+
+
+def label(text, theme, size=34, pad=4):
+    dark = theme == "dark"
+    col = INK_LIGHT if dark else INK_DARK
+    d, w = text_path(text, "serif", size, pad, size * 0.78 + pad)
+    h = round(size * 1.05 + 2 * pad)
+    w = math.ceil(w + 2 * pad)
+    svg = (f'<svg width="{w}" height="{h}" viewBox="0 0 {w} {h}" xmlns="http://www.w3.org/2000/svg">'
+           f'<path d="{d}" fill="{col}"/></svg>')
+    slug = text.lower().replace(" ", "-")
+    path = f"{OUT}/label-{slug}-{theme}.svg"
+    open(path, "w").write(svg)
+    return path
+
+
+if __name__ == "__main__":
+    made = [banner("dark"), banner("light")]
+    for t in ("Working with", "Writing", "Find me"):
+        made += [label(t, "dark"), label(t, "light")]
+    for p in made:
+        print(p, os.path.getsize(p), "bytes")
