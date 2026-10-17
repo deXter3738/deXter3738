@@ -61,10 +61,34 @@ def banner(theme):
 
     # light sweep from top-right, as in the cover's star burst
     sweep_origin = (1720, -260)
+    # The reference effect (reactbits "light rays") is a shader summing two
+    # angular wave fields that drift in opposite directions at different
+    # speeds; where they beat against each other the rays brighten, dim and
+    # appear to travel across the fan. Two counter-rotating fans reproduce
+    # that read. Rotation and opacity sit on plain wrapper groups, so the
+    # expensive blur inside each fan is rasterised once and only composited.
+    fan_a = rays(*sweep_origin, 9, 1500, 38, 118, "rayGrad", 0.42 if dark else 0.3, "blur40", glow_blend)
+    fan_b = rays(*sweep_origin, 5, 1400, 30, 124, "rayGrad2", 0.28 if dark else 0.0, "blur14", glow_blend)
     sweep = (
-        rays(*sweep_origin, 9, 1500, 38, 118, "rayGrad", 0.42 if dark else 0.3, "blur40", glow_blend)
-        + rays(*sweep_origin, 5, 1400, 30, 124, "rayGrad2", 0.28 if dark else 0.0, "blur14", glow_blend)
+        f'<g class="fanA"><g class="spinA">{fan_a}</g></g>'
+        f'<g class="fanB"><g class="spinB">{fan_b}</g></g>'
     )
+
+    # Held still for anyone who has asked their system to reduce motion.
+    ox, oy = sweep_origin
+    motion = f"""<style>
+    .spinA, .spinB {{ transform-box: view-box; transform-origin: {ox}px {oy}px; }}
+    @keyframes spinA {{ from {{ transform: rotate(-1.9deg); }} to {{ transform: rotate(1.9deg); }} }}
+    @keyframes spinB {{ from {{ transform: rotate(2.6deg); }} to {{ transform: rotate(-2.6deg); }} }}
+    @keyframes breatheA {{ from {{ opacity: 0.68; }} to {{ opacity: 1; }} }}
+    @keyframes breatheB {{ from {{ opacity: 0.45; }} to {{ opacity: 1; }} }}
+    @media (prefers-reduced-motion: no-preference) {{
+      .spinA {{ animation: spinA 19s ease-in-out infinite alternate; }}
+      .spinB {{ animation: spinB 13s ease-in-out infinite alternate; }}
+      .fanA  {{ animation: breatheA 11s ease-in-out infinite alternate; }}
+      .fanB  {{ animation: breatheB 8.5s ease-in-out infinite alternate; }}
+    }}
+  </style>"""
 
     # The banner is shown at 100% width, so its edges meet the page. Fading
     # them into the ground colour stops the artwork reading as a block on the
@@ -77,17 +101,21 @@ def banner(theme):
         f'<rect x="{W - 72}" width="72" height="{H}" fill="url(#fadeRight)"/>'
     )
 
+    # A tight, low halo. The old one (0.5 at a 10px blur, plus a 0.5 gradient
+    # bloom) spread far enough past the letterforms that the title read as
+    # soft-focus rather than lit.
     if dark:
         glow_title = (
-            f'<g opacity="0.5" filter="url(#blur10)" style="mix-blend-mode:screen">'
+            f'<g opacity="0.26" filter="url(#blur5)" style="mix-blend-mode:screen">'
             f'<path d="{title_d}" fill="{type_col}"/></g>'
-            f'<g filter="url(#blur5)"><path d="{title_d}" fill="url(#titleGrad)" fill-opacity="0.5"/></g>'
+            f'<g filter="url(#blur5)"><path d="{title_d}" fill="url(#titleGrad)" fill-opacity="0.28"/></g>'
         )
     else:
-        glow_title = f'<g filter="url(#blur7)"><path d="{title_d}" fill="url(#titleGrad)" fill-opacity="0.55"/></g>'
+        glow_title = f'<g filter="url(#blur5)"><path d="{title_d}" fill="url(#titleGrad)" fill-opacity="0.3"/></g>'
 
 
     svg = f'''<svg width="{W}" height="{H}" viewBox="0 0 {W} {H}" fill="none" xmlns="http://www.w3.org/2000/svg">
+{motion}
 <defs>
   <radialGradient id="ground" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 {H}) rotate(-14) scale(1632 1260)">
     <stop stop-color="{'#8E9AB5' if dark else '#FFFFFF'}"/><stop offset="1" stop-color="{bg}"/>
