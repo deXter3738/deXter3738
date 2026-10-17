@@ -16,7 +16,9 @@ I started in engineering, moved into design, and now spend most of my time in th
   <img src="assets/label-working-with-light.svg" alt="Working with" height="36">
 </picture>
 
-Figma · Framer · Python · TypeScript / React (learning in public)
+![Figma](https://img.shields.io/badge/Figma-F24E1E?style=flat-square&logo=figma&logoColor=white)&nbsp;&nbsp;![Framer](https://img.shields.io/badge/Framer-0055FF?style=flat-square&logo=framer&logoColor=white)&nbsp;&nbsp;![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)&nbsp;&nbsp;![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)&nbsp;&nbsp;![React](https://img.shields.io/badge/React-20232A?style=flat-square&logo=react&logoColor=61DAFB)
+
+<sub>TypeScript / React — learning in public.</sub>
 
 <br>
 
@@ -34,7 +36,7 @@ Figma · Framer · Python · TypeScript / React (learning in public)
   <img src="assets/label-find-me-light.svg" alt="Find me" height="36">
 </picture>
 
-[Portfolio](https://sayerhs.com) · [LinkedIn](https://www.linkedin.com/in/shreyasbhosale/) · [X](https://x.com/saayerhs) · [Refrakt](https://refrakt.app/shreyas) · [Email](mailto:shreyasbhosle89@gmail.com)
+[![Portfolio](https://img.shields.io/badge/Portfolio-FED259?style=flat-square&logoColor=0F0F0E)](https://sayerhs.com)&nbsp;&nbsp;[![LinkedIn](https://img.shields.io/badge/LinkedIn-0A66C2?style=flat-square&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/shreyasbhosale/)&nbsp;&nbsp;[![X](https://img.shields.io/badge/X-000000?style=flat-square&logo=x&logoColor=white)](https://x.com/saayerhs)&nbsp;&nbsp;[![Refrakt](https://img.shields.io/badge/Refrakt-6600FF?style=flat-square)](https://refrakt.app/shreyas)&nbsp;&nbsp;[![Email](https://img.shields.io/badge/Email-EA4335?style=flat-square&logo=gmail&logoColor=white)](mailto:shreyasbhosle89@gmail.com)
 
 <!--
 Projects section — add here once repos are public. Generate a matching
